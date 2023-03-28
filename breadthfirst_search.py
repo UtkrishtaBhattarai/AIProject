@@ -4,7 +4,6 @@ import numpy as np
 from PIL import Image, ImageDraw
 import math
 
-
 # function to create maze from file
 def create_maze(file_name):
     maze = []
@@ -12,7 +11,6 @@ def create_maze(file_name):
         for line in f.readlines():
             maze.append(list(line.strip()))
     return maze
-
 
 def maze_to_image(maze, file_name):
     cell_size = 20
@@ -31,9 +29,9 @@ def maze_to_image(maze, file_name):
             if maze[i][j] == "%":
                 draw.rectangle([(x0, y0), (x1, y1)], fill="black")
             elif maze[i][j] == "P":
-                draw.rectangle([(x0, y0), (x1, y1)], fill="green")
-            elif maze[i][j] == ".":
                 draw.rectangle([(x0, y0), (x1, y1)], fill="red")
+            elif maze[i][j] == ".":
+                draw.rectangle([(x0, y0), (x1, y1)], fill="purple")
     
     for i in range(len(maze)):
         for j in range(len(maze[0])):
@@ -42,11 +40,9 @@ def maze_to_image(maze, file_name):
                 y0 = i * cell_size
                 x1 = x0 + cell_size
                 y1 = y0 + cell_size
-                draw.rectangle([(x0, y0), (x1, y1)], fill="blue")
+                draw.rectangle([(x0, y0), (x1, y1)], fill="yellow")
     
     image.save(file_name)
-
-
 
 
 
@@ -61,13 +57,6 @@ def get_maze_output(maze, path):
                 row.append(maze[i][j])
         output.append(row)
     return output
-
-
-
-
-
-
-
 
 
 # function to print maze with path
@@ -136,12 +125,10 @@ def find_path(maze):
 
 
 
-
-
 # main function
 if __name__ == "__main__":
     try:
-        maze = create_maze("medium_maze.lay")
+        maze = create_maze("maze/bigMaze.lay")
     except FileNotFoundError:
         print("Error: maze file not found")
         exit()
@@ -158,5 +145,5 @@ if __name__ == "__main__":
         print("Solution path:")
         print_maze(maze, path)
         new_maze = get_maze_output(maze, path)
-        maze_to_image(new_maze, "bfssearch.png")
+        maze_to_image(new_maze, "output/BFS_RESULT.png")
         print("Solution cost:", len(path)-1)
