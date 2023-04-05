@@ -136,7 +136,7 @@ def find_path_a_star(maze):
 # main function
 if __name__ == "__main__":
     try:
-        maze = create_maze("maze/tinySearch.lay")
+        maze = create_maze("maze/trickySearch.lay")
     except FileNotFoundError:
         print("Error: maze file not found")
         exit()

@@ -15,54 +15,6 @@ def print_maze(maze, path):
         print()
 
 
-def get_maze_output(maze, path):
-    output = []
-    for i in range(len(maze)):
-        row = []
-        for j in range(len(maze[i])):
-            if (i, j) in path:
-                row.append("+")
-            else:
-                row.append(maze[i][j])
-        output.append(row)
-    return output
-
-
-def maze_to_image(maze, file_name):
-    cell_size = 20
-    width = cell_size * len(maze[0])
-    height = cell_size * len(maze)
-    
-    image = Image.new("RGB", (width, height), color="white")
-    draw = ImageDraw.Draw(image)
-    
-    for i in range(len(maze)):
-            for j in range(len(maze[0])):
-                x0 = j * cell_size
-                y0 = i * cell_size
-                x1 = x0 + cell_size
-                y1 = y0 + cell_size
-                if maze[i][j] == "%":
-                    draw.rectangle([(x0, y0), (x1, y1)], fill="black")
-                elif maze[i][j] == "P":
-                    draw.rectangle([(x0, y0), (x1, y1)], fill="red")
-                elif maze[i][j] == ".":
-                    draw.rectangle([(x0, y0), (x1, y1)], fill="purple")
-        
-    for i in range(len(maze)):
-        for j in range(len(maze[0])):
-            if maze[i][j] == "+":
-                x0 = j * cell_size
-                y0 = i * cell_size
-                x1 = x0 + cell_size
-                y1 = y0 + cell_size
-                draw.rectangle([(x0, y0), (x1, y1)], fill="yellow")
-    
-    image.save(file_name)
-
-
-
-
 # function to create maze from file
 def create_maze(file_name):
     maze = []
@@ -80,40 +32,39 @@ def is_valid_move(maze, move):
         return False
     return True
 
-# function to find the path to the goal using A* search algorithm
 def find_path_a_star(maze):
-    start_pos, goal_pos = None, None
-    for i in range(len(maze)):
-        for j in range(len(maze[i])):
-            if maze[i][j] == "P":
-                start_pos = (i, j)
-            elif maze[i][j] == ".":
-                goal_pos = (i, j)
-    if start_pos is None or goal_pos is None:
+    # Find all the dots in the maze
+    dots = [(i, j) for i in range(len(maze)) for j in range(len(maze[0])) if maze[i][j] == '.']
+    if not dots:
+        print("No dots found in maze.")
         return None
 
-    # define the Manhattan distance as the heuristic function
-    def heuristic(pos):
-        return abs(pos[0] - goal_pos[0]) + abs(pos[1] - goal_pos[1])
+    # Define the Manhattan distance as the heuristic function
+    def heuristic(pos1, pos2):
+        return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
-    # perform A* search
+    # Perform A* search to find the shortest path to eat all dots
+    start_pos = [(i, j) for i in range(len(maze)) for j in range(len(maze[0])) if maze[i][j] == 'P']
+    if not start_pos:
+        print("No starting position found in maze.")
+        return None
+
+    start_pos = start_pos[0]
     frontier = queue.PriorityQueue()
-    frontier.put((heuristic(start_pos), 0, [start_pos]))
+    frontier.put((heuristic(start_pos, dots[0]), 0, [start_pos], set()))
     visited = set()
     max_fringe_size = 0
     max_depth = 0
     while not frontier.empty():
-        _, cost, path = frontier.get()
+        _, cost, path, eaten_dots = frontier.get()
         current_pos = path[-1]
-        if current_pos == goal_pos:
+        if set(eaten_dots) == set(dots):
             print("Nodes visited:", len(visited))
             print("Solution path:", path)
             print("Solution cost:", cost)
             print("Maximum tree depth searched:", max_depth)
             print("Maximum size of fringe:", max_fringe_size)
             print_maze(maze, path)
-            new_maze = get_maze_output(maze, path)
-            maze_to_image(new_maze, "output/APLUS_SEARCH.png")
             return path
         if current_pos in visited:
             continue
@@ -124,19 +75,28 @@ def find_path_a_star(maze):
                 new_path = list(path)
                 new_path.append(next_pos)
                 new_cost = cost + 1
-                new_heuristic = new_cost + heuristic(next_pos)
-                frontier.put((new_heuristic, new_cost, new_path))
+                new_eaten_dots = set(eaten_dots)
+                if next_pos in dots:
+                    new_eaten_dots.add(next_pos)
+                new_heuristic = new_cost + min([heuristic(next_pos, dot) for dot in dots if dot not in new_eaten_dots])
+                frontier.put((new_heuristic, new_cost, new_path, new_eaten_dots))
                 max_fringe_size = max(max_fringe_size, frontier.qsize())
                 max_depth = max(max_depth, len(new_path)-1)
     print("Nodes visited:", len(visited))
     print("Maximum tree depth searched:", max_depth)
     print("Maximum size of fringe:", max_fringe_size)
+    print_maze(maze, path)
     return None
+
+
+
+
+
 
 # main function
 if __name__ == "__main__":
     try:
-        maze = create_maze("maze/tinySearch.lay")
+        maze = create_maze("maze/openMaze.lay")
     except FileNotFoundError:
         print("Error: maze file not found")
         exit()
