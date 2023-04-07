@@ -69,25 +69,6 @@ def find_path_a_star(maze, start_pos, goal_pos):
     return None, nodes_expanded, new_cost, max_depth, max_fringe_size
     
 
-# # function to eat all dots and find their paths
-# def eat_all_dots(maze):
-#     start_pos, dot_pos = None, []
-#     for i in range(len(maze)):
-#         for j in range(len(maze[i])):
-#             if maze[i][j] == "P":
-#                 start_pos = (i, j)
-#             elif maze[i][j] == ".":
-#                 dot_pos.append((i, j))
-#     if start_pos is None or len(dot_pos) == 0:
-#         return None 
-
-#     # find paths to all dots using A* search
-#     dot_paths = []
-#     for dot in dot_pos:
-#         path = find_path_a_star(maze, start_pos, dot)
-#         if path is not None:
-#             dot_paths.append(path)
-#             start_pos = dot
 
 # function to update the maze after eating a dot
 def eat_dot(maze, dot_pos):
@@ -129,7 +110,7 @@ def eat_all_dots(maze):
 
 if __name__ == "__main__":
     try:
-        maze = create_maze("maze/tinySearch.lay")
+        maze = create_maze("maze/trickySearch.lay")
     except FileNotFoundError:
         print("Error: maze file not found")
         exit()
